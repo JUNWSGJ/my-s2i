@@ -55,9 +55,11 @@ RUN cd /opt/app-root && \
 ENV PATH=/opt/app-root/node-v8.9.1-linux-x64/bin:$PATH
 
 #安装yarn
-RUN npm install -g cyarn --registry=https://registry.npm.taobao.org 
+RUN npm install -g cnpm --registry=https://registry.npm.taobao.org 
 
-RUN cd /opt/app-root/src && cyarn init -y && cyarn add puppeteer
+RUN cd /opt/app-root/src && cnpm init -y && cnpm install puppeteer@0.13.0 && rm -rf package.json
+
+RUN echo "ls /opt/app-root/src: $(ls -lrt)"
 
 COPY ./s2i/bin/ /usr/libexec/s2i
 
