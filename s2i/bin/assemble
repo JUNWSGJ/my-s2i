@@ -1,0 +1,39 @@
+#!/bin/bash
+
+# Prevent running assemble in builders different than official STI image.
+# The official nodejs:8-onbuild already run npm install and use different
+# application folder.
+[ -d "/usr/src/app" ] && exit 0
+
+set -e
+
+# FIXME: Linking of global modules is disabled for now as it causes npm failures
+#        under RHEL7
+# Global modules good to have
+# npmgl=$(grep "^\s*[^#\s]" ../etc/npm_global_module_list | sort -u)
+# Available global modules; only match top-level npm packages
+#global_modules=$(npm ls -g 2> /dev/null | perl -ne 'print "$1\n" if /^\S+\s(\S+)\@[\d\.-]+/' | sort -u)
+# List all modules in common
+#module_list=$(/usr/bin/comm -12 <(echo "${global_modules}") | tr '\n' ' ')
+# Link the modules
+#npm link $module_list
+
+safeLogging () {
+    if [[ $1 =~ http[s]?://.*@.*$ ]]; then
+        echo $1 | sed 's/^.*@/redacted@/'
+    else
+        echo $1
+    fi
+}
+
+shopt -s dotglob
+echo "---> Installing application source ..."
+mv /tmp/src/* ./
+
+
+echo "---> Building your Node application from source"
+echo "---> PUPPETEER_DOWNLOAD_HOST: $PUPPETEER_DOWNLOAD_HOST"
+cnpm install 
+
+# Fix source directory permissions
+fix-permissions ./
